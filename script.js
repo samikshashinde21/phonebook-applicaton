@@ -7,6 +7,7 @@ const {
   deleteContact,
   getAllContacts,
   searchContacts,
+  exportToCSV,
 } = require("./operations");
 
 
@@ -22,7 +23,8 @@ function showMenu() {
   console.log("3. Delete Contact");
   console.log("4. View All Contacts");
   console.log("5. Search Contact");
-  console.log("6. Exit");
+  console.log("6. Export to CSV");
+  console.log("7. Exit");
 
   rl.question("\nEnter your choice: ", handleChoice);
 }
@@ -45,9 +47,12 @@ function handleChoice(choice) {
       searchContactFlow();
       break;
     case "6":
+      exportCSVFlow();
+      break;
+    case "7":
       console.log("Goodbye 👋");
       rl.close();
-      break;
+      break;  
     default:
       console.log("Invalid choice!");
       showMenu();
@@ -99,7 +104,13 @@ function askEmail(name, phone) {
       return;
     }
 
-    addContact(name, phone, email);
+    const success = addContact(name, phone, email);
+
+    if (!success) {
+      console.log("❌ Contact with same phone or email already exists!");
+      showMenu();
+      return;
+    }
 
     console.log("✅ Contact added!");
     showMenu();
@@ -126,6 +137,12 @@ function updateContactFlow() {
           }
 
           const success = updateContact(id, name, phone, email);
+
+           if (success === "DUPLICATE") {
+             console.log("❌ Phone or email already exists!");
+             showMenu();
+             return;
+       }
 
           if (!success) {
             console.log("❌ Contact not found!");
@@ -189,5 +206,18 @@ function searchContactFlow() {
     showMenu();
   });
 }
+
+function exportCSVFlow() {
+  const success = exportToCSV();
+
+  if (!success) {
+    console.log("❌ No contacts to export.");
+  } else {
+    console.log("✅ Contacts exported to contacts.csv");
+  }
+
+  showMenu();
+}
+
 
 showMenu();

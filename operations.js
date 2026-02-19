@@ -25,6 +25,14 @@ function generateId(contacts) {
 function addContact(name, phone, email) {
   const contacts = getContacts();
 
+  const exists = contacts.some(
+  (c) => c.phone === phone || (email && c.email === email)
+  );
+
+  if (exists) {
+  return false;
+  }
+
   const newContact = {
     id: generateId(contacts),
     name,
@@ -34,6 +42,8 @@ function addContact(name, phone, email) {
 
   contacts.push(newContact);
   saveContacts(contacts);
+
+  return true;
 }
 
 function updateContact(id, name, phone, email) {
@@ -42,6 +52,17 @@ function updateContact(id, name, phone, email) {
   const contact = contacts.find((c) => c.id == id);
 
   if (!contact) return false;
+
+const exists = contacts.some(
+    (c) =>
+      c.id != id &&
+      ( (phone && c.phone === phone) ||
+        (email && c.email === email) )
+  );
+
+  if (exists) {
+    return "DUPLICATE";
+  }
 
   contact.name = name || contact.name;
   contact.phone = phone || contact.phone;
@@ -76,10 +97,28 @@ function searchContacts(query) {
   );
 }
 
+function exportToCSV() {
+  const contacts = getContacts();
+
+  if (contacts.length === 0) return false;
+
+  let csv = "ID,Name,Phone,Email\n";
+
+  contacts.forEach((c) => {
+    csv += `${c.id},${c.name},${c.phone},${c.email}\n`;
+  });
+
+  fs.writeFileSync("contacts.csv", csv);
+
+  return true;
+}
+
+
 module.exports = {
   addContact,
   updateContact,
   deleteContact,
   getAllContacts,
   searchContacts,
+  exportToCSV,
 };
