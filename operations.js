@@ -84,8 +84,12 @@ function deleteContact(id) {
 }
 
 function getAllContacts() {
-  return getContacts();
+  const contacts = getContacts();
+
+  return contacts.sort((a, b) => a.id - b.id);
 }
+
+
 
 function searchContacts(query) {
   const contacts = getContacts();
