@@ -68,26 +68,52 @@ function handleChoice(choice) {
 }
 
 function addContact() {
-  rl.question("Enter Name: ", (name) => {
-    rl.question("Enter Phone: ", (phone) => {
-      rl.question("Enter Email: ", (email) => {
+  askName();
+}
 
-        const contacts = getContacts();
+function askName() {
+  rl.question("*Enter Name: ", (name) => {
 
-        const newContact = {
-          id: generateId(contacts),
-          name,
-          phone,
-          email,
-        };
+    if (!name.trim()) {
+      console.log("❌ Name is required!");
+      askName();
+      return;
+    }
 
-        contacts.push(newContact);
-        saveContacts(contacts);
+    askPhone(name);
+  });
+}
 
-        console.log("✅ Contact added!");
-        showMenu();
-      });
-    });
+function askPhone(name) {
+  rl.question("*Enter Phone: ", (phone) => {
+
+    if (!phone.trim()) {
+      console.log("❌ Phone number is required!");
+      askPhone(name);
+      return;
+    }
+
+    askEmail(name, phone);
+  });
+}
+
+function askEmail(name, phone) {
+  rl.question("Enter Email (optional): ", (email) => {
+
+    const contacts = getContacts();
+
+    const newContact = {
+      id: generateId(contacts),
+      name,
+      phone,
+      email: email || "",
+    };
+
+    contacts.push(newContact);
+    saveContacts(contacts);
+
+    console.log("✅ Contact added!");
+    showMenu();
   });
 }
 
@@ -108,7 +134,7 @@ function updateContact() {
 
           contact.name = name || contact.name;
           contact.phone = phone || contact.phone;
-          contact.email = email || contact.email;
+          contact.email = email !== "" ? email : contact.email;
 
           saveContacts(contacts);
 
