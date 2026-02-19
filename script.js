@@ -1,32 +1,17 @@
-const fs = require("fs");
 const readline = require("readline");
+
+const {
+  addContact,
+  updateContact,
+  deleteContact,
+  getAllContacts,
+  searchContacts,
+} = require("./operations");
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
-
-const DATA_FILE = "contacts.json";
-
-function getContacts() {
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, "[]");
-    return [];
-  }
-
-  const data = fs.readFileSync(DATA_FILE, "utf-8");
-  return JSON.parse(data || "[]");
-}
-
-function saveContacts(contacts) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(contacts, null, 2));
-}
-
-function generateId(contacts) {
-  return contacts.length > 0
-    ? contacts[contacts.length - 1].id + 1
-    : 1;
-}
 
 function showMenu() {
   console.log("\n📞 Phonebook Application");
@@ -43,19 +28,19 @@ function showMenu() {
 function handleChoice(choice) {
   switch (choice) {
     case "1":
-      addContact();
+      addContactFlow();
       break;
     case "2":
-      updateContact();
+      updateContactFlow();
       break;
     case "3":
-      deleteContact();
+      deleteContactFlow();
       break;
     case "4":
       viewContacts();
       break;
     case "5":
-      searchContact();
+      searchContactFlow();
       break;
     case "6":
       console.log("Goodbye 👋");
@@ -67,13 +52,12 @@ function handleChoice(choice) {
   }
 }
 
-function addContact() {
+function addContactFlow() {
   askName();
 }
 
 function askName() {
   rl.question("*Enter Name: ", (name) => {
-
     if (!name.trim()) {
       console.log("❌ Name is required!");
       askName();
@@ -86,7 +70,6 @@ function askName() {
 
 function askPhone(name) {
   rl.question("*Enter Phone: ", (phone) => {
-
     if (!phone.trim()) {
       console.log("❌ Phone number is required!");
       askPhone(name);
@@ -99,46 +82,26 @@ function askPhone(name) {
 
 function askEmail(name, phone) {
   rl.question("Enter Email (optional): ", (email) => {
-
-    const contacts = getContacts();
-
-    const newContact = {
-      id: generateId(contacts),
-      name,
-      phone,
-      email: email || "",
-    };
-
-    contacts.push(newContact);
-    saveContacts(contacts);
+    addContact(name, phone, email);
 
     console.log("✅ Contact added!");
     showMenu();
   });
 }
 
-function updateContact() {
+function updateContactFlow() {
   rl.question("Enter Contact ID to Update: ", (id) => {
-    const contacts = getContacts();
-    const contact = contacts.find((c) => c.id == id);
-
-    if (!contact) {
-      console.log("❌ Contact not found!");
-      showMenu();
-      return;
-    }
-
     rl.question("New Name: ", (name) => {
       rl.question("New Phone: ", (phone) => {
         rl.question("New Email: ", (email) => {
+          const success = updateContact(id, name, phone, email);
 
-          contact.name = name || contact.name;
-          contact.phone = phone || contact.phone;
-          contact.email = email !== "" ? email : contact.email;
+          if (!success) {
+            console.log("❌ Contact not found!");
+          } else {
+            console.log("✅ Contact updated!");
+          }
 
-          saveContacts(contacts);
-
-          console.log("✅ Contact updated!");
           showMenu();
         });
       });
@@ -146,16 +109,13 @@ function updateContact() {
   });
 }
 
-function deleteContact() {
+function deleteContactFlow() {
   rl.question("Enter Contact ID to Delete: ", (id) => {
-    const contacts = getContacts();
+    const success = deleteContact(id);
 
-    const filtered = contacts.filter((c) => c.id != id);
-
-    if (filtered.length === contacts.length) {
+    if (!success) {
       console.log("❌ Contact not found!");
     } else {
-      saveContacts(filtered);
       console.log("✅ Contact deleted!");
     }
 
@@ -164,7 +124,7 @@ function deleteContact() {
 }
 
 function viewContacts() {
-  const contacts = getContacts();
+  const contacts = getAllContacts();
 
   if (contacts.length === 0) {
     console.log("No contacts found.");
@@ -175,15 +135,9 @@ function viewContacts() {
   showMenu();
 }
 
-function searchContact() {
+function searchContactFlow() {
   rl.question("Enter name or phone: ", (query) => {
-    const contacts = getContacts();
-
-    const results = contacts.filter(
-      (c) =>
-        c.name.toLowerCase().includes(query.toLowerCase()) ||
-        c.phone.includes(query)
-    );
+    const results = searchContacts(query);
 
     if (results.length === 0) {
       console.log("❌ No match found.");
