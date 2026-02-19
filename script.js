@@ -1,4 +1,5 @@
 const readline = require("readline");
+const { isValidPhone, isValidEmail } = require("./validations");
 
 const {
   addContact,
@@ -7,6 +8,7 @@ const {
   getAllContacts,
   searchContacts,
 } = require("./operations");
+
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -70,8 +72,15 @@ function askName() {
 
 function askPhone(name) {
   rl.question("*Enter Phone: ", (phone) => {
+
     if (!phone.trim()) {
       console.log("❌ Phone number is required!");
+      askPhone(name);
+      return;
+    }
+
+    if (!isValidPhone(phone)) {
+      console.log("❌ Phone must be exactly 10 digits!");
       askPhone(name);
       return;
     }
@@ -80,8 +89,16 @@ function askPhone(name) {
   });
 }
 
+
 function askEmail(name, phone) {
   rl.question("Enter Email (optional): ", (email) => {
+
+    if (email.trim() && !isValidEmail(email)) {
+      console.log("❌ Invalid email format!");
+      askEmail(name, phone);
+      return;
+    }
+
     addContact(name, phone, email);
 
     console.log("✅ Contact added!");
@@ -93,7 +110,21 @@ function updateContactFlow() {
   rl.question("Enter Contact ID to Update: ", (id) => {
     rl.question("New Name: ", (name) => {
       rl.question("New Phone: ", (phone) => {
+
+        if (phone.trim() && !isValidPhone(phone)) {
+          console.log("❌ Phone must be exactly 10 digits!");
+          showMenu();
+          return;
+        }
+
         rl.question("New Email: ", (email) => {
+
+          if (email.trim() && !isValidEmail(email)) {
+            console.log("❌ Invalid email format!");
+            showMenu();
+            return;
+          }
+
           const success = updateContact(id, name, phone, email);
 
           if (!success) {
@@ -111,15 +142,25 @@ function updateContactFlow() {
 
 function deleteContactFlow() {
   rl.question("Enter Contact ID to Delete: ", (id) => {
-    const success = deleteContact(id);
 
-    if (!success) {
-      console.log("❌ Contact not found!");
-    } else {
-      console.log("✅ Contact deleted!");
-    }
+    rl.question("Are you sure you want to delete this contact? (y/n): ", (ans) => {
 
-    showMenu();
+      if (ans.toLowerCase() !== "y") {
+        console.log("❎ Delete cancelled.");
+        showMenu();
+        return;
+      }
+
+      const success = deleteContact(id);
+
+      if (!success) {
+        console.log("❌ Contact not found!");
+      } else {
+        console.log("✅ Contact deleted!");
+      }
+
+      showMenu();
+    });
   });
 }
 
