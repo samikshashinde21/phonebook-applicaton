@@ -10,6 +10,7 @@ It allows users to manage contacts with full CRUD functionality and search capab
 
 ### 1️⃣ Clone the Repository
 
+```bash
 git clone https://github.com/samikshashinde21/phonebook-applicaton.git
 cd phonebook-application
 
