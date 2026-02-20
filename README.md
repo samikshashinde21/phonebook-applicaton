@@ -37,6 +37,14 @@ The CLI menu will appear in the terminal.
 - Email format is validated using regex
 - Duplicate phone numbers or emails are prevented
 
+### Assumptions
+
+- Phone numbers are strictly 10-digit numeric values.
+- Email field is optional.
+- IDs are auto-generated incrementally.
+- The application is designed for single-user CLI usage.
+- Data file (`contacts.json`) is not manually modified during execution.
+
 ## Data Storage Details
 
 - Contacts are stored in `contacts.json`
